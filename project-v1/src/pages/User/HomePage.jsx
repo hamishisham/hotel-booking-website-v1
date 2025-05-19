@@ -21,8 +21,7 @@ const HomePage = () => {
 
   return (
     <div>
-      {/* Header */}
-      <Header />
+      
 
       {/* Hero Section */}
       <HeroSection city={city} setCity={setCity} />
@@ -36,8 +35,7 @@ const HomePage = () => {
         <MainContent city={city} hotels={hotels} />
       </Container>
 
-      {/* Footer */}
-      <Footer />
+      
     </div>
   );
 };

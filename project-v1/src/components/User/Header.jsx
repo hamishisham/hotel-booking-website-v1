@@ -32,8 +32,7 @@ const Header = () => {
   const navLinks = [
     { label: 'Home', path: '/booknest' },
     { label: 'Cities', path: '/cities' },
-    { label: 'About', path: '/about' },
-    { label: 'Contact', path: '/contact' },
+    { label: 'About', path: '/booknest/about' },
   ];
 
   return (

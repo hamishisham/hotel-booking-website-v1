@@ -8,10 +8,13 @@ import HomePage from './pages/User/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
 import NotAuthorizedPage from './pages/NotAuthorizedPage';
 import DashboardLayout from './components/Admin/DashboardLayout';
+import Layout from './components/User/Layout'
 import HotelsTable from './components/Admin/HotelsTable';
 import UsersTable from './components/Admin/UsersTable';
 import BookingsTable from './components/Admin/BookingsTable.';
 import ProtectedAdminRoute from './pages/Admin/ProtectedAdminRoute';
+import About from './pages/User/About';
+import BookingPage from './pages/User/BookingPage';
 function App() {
   return (
     <Router>
@@ -19,9 +22,15 @@ function App() {
         {/* Public Routes */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/booknest" element={<HomePage />} />
         <Route path="/not-authorized" element={<NotAuthorizedPage />} />
         <Route path="*" element={<NotFoundPage />} />
+
+      <Route element={<Layout />}>
+        <Route path="/booknest" element={<HomePage />} />
+        <Route path="/booknest/about" element={<About />} />
+        <Route path="/book/:id"  element={<BookingPage />} />
+        {/* other routes */}
+      </Route>
 
         {/* Protected Admin Routes */}
         <Route
