@@ -1,14 +1,30 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext"; // تأكدي إن المسار صحيح حسب مشروعك
 
-const BookingContext = createContext();
+// Create the context
+export const BookingContext = createContext();
+
+// Custom hook to use the context
 export const useBookings = () => useContext(BookingContext);
 
+// API URL
 const API_URL = "https://hotel-json-server-production.up.railway.app/bookings";
 
+// Generate a random 3-digit room number that is not already used
+const generateRandomRoomNumber = (existingRoomNumbers) => {
+  let roomNumber;
+  do {
+    roomNumber = Math.floor(100 + Math.random() * 900);
+  } while (existingRoomNumbers.includes(roomNumber));
+  return roomNumber;
+};
+
+// Provider component
 export const BookingProvider = ({ children }) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { currentUser } = useAuth(); // Get current user
 
   // Fetch all bookings
   const fetchBookings = async () => {
@@ -22,7 +38,27 @@ export const BookingProvider = ({ children }) => {
     }
   };
 
-  // Delete booking
+  // Create a new booking
+  const createBooking = async (newBooking) => {
+    try {
+      const existingRoomNumbers = bookings.map((b) => b.roomNumber);
+      const randomRoomNumber = generateRandomRoomNumber(existingRoomNumbers);
+
+      const bookingWithDefaults = {
+        ...newBooking,
+        roomNumber: randomRoomNumber,
+        status: newBooking.status || "pending",
+        userId: currentUser?.id, // Automatically attach the userId
+      };
+
+      const res = await axios.post(API_URL, bookingWithDefaults);
+      setBookings((prev) => [...prev, res.data]);
+    } catch (error) {
+      console.error("Error creating booking:", error);
+    }
+  };
+
+  // Delete a booking
   const deleteBooking = async (id) => {
     try {
       await axios.delete(`${API_URL}/${id}`);
@@ -32,7 +68,7 @@ export const BookingProvider = ({ children }) => {
     }
   };
 
-  // Update booking
+  // Update an existing booking
   const updateBooking = async (updatedBooking) => {
     try {
       const res = await axios.put(`${API_URL}/${updatedBooking.id}`, updatedBooking);
@@ -44,6 +80,7 @@ export const BookingProvider = ({ children }) => {
     }
   };
 
+  // Fetch bookings when component mounts
   useEffect(() => {
     fetchBookings();
   }, []);
@@ -53,8 +90,9 @@ export const BookingProvider = ({ children }) => {
       value={{
         bookings,
         loading,
+        createBooking,
         deleteBooking,
-        updateBooking, // <- make sure to export this
+        updateBooking,
       }}
     >
       {children}

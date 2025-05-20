@@ -14,7 +14,7 @@ import {
 
 const BookingEditDialog = ({ open, onClose, onSave, booking, onChange }) => {
   const statuses = ["Pending", "Confirmed", "Cancelled"];
-  const availableRooms = [101, 102, 103, 201, 202, 203];
+  const availableRooms = ["101", "102", "103", "201", "202", "203", "304", "105"];
 
   return (
     <Dialog open={open} onClose={onClose}>
@@ -67,11 +67,35 @@ const BookingEditDialog = ({ open, onClose, onSave, booking, onChange }) => {
           fullWidth
           InputLabelProps={{ shrink: true }}
         />
+        <TextField
+          label="Number of Rooms"
+          name="numberOfRooms"
+          type="number"
+          value={booking.numberOfRooms}
+          onChange={onChange}
+          fullWidth
+        />
+        <TextField
+          label="Adults"
+          name="adults"
+          type="number"
+          value={booking.adults}
+          onChange={onChange}
+          fullWidth
+        />
+        <TextField
+          label="Children"
+          name="children"
+          type="number"
+          value={booking.children}
+          onChange={onChange}
+          fullWidth
+        />
         <FormControl fullWidth>
           <InputLabel>Status</InputLabel>
           <Select
             name="status"
-            value={booking.status}
+            value={booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
             onChange={onChange}
             label="Status"
           >

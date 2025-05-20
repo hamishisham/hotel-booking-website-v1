@@ -15,6 +15,7 @@ import BookingsTable from './components/Admin/BookingsTable.';
 import ProtectedAdminRoute from './pages/Admin/ProtectedAdminRoute';
 import About from './pages/User/About';
 import BookingPage from './pages/User/BookingPage';
+import BookingHistoryPage from './pages/User/BookingHistoryPage';
 function App() {
   return (
     <Router>
@@ -29,6 +30,8 @@ function App() {
         <Route path="/booknest" element={<HomePage />} />
         <Route path="/booknest/about" element={<About />} />
         <Route path="/book/:id"  element={<BookingPage />} />
+        <Route path="/history"  element={<BookingHistoryPage />} />
+
         {/* other routes */}
       </Route>
 

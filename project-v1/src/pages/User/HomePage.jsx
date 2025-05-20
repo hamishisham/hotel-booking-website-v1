@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Container, Grid } from '@mui/material';
-import { useAuth } from '../../context/AuthContext';
-import { useHotels} from '../../context/HotelContext';
-import Header from '../../components/User/Header'; // Import the Header component
-import Footer from '../../components/User/Footer'; // Import the Footer component
-import HeroSection from '../../components/User/HeroSection'; // Import HeroSection
-import HotelCard from '../../components/User/HotelCard'; // Import HotelCard
-import MainContent from '../../components/User/MainContent'; // Import MainContent
+import { Box } from '@mui/material';
+import { useHotels } from '../../context/HotelContext';
+import HeroSection from '../../components/User/HeroSection';
+import MainContent from '../../components/User/MainContent';
 
 const HomePage = () => {
-  const { user } = useAuth();
   const [city, setCity] = useState('');
   const { hotels, fetchHotels } = useHotels();
 
@@ -20,23 +15,15 @@ const HomePage = () => {
   }, [city, fetchHotels]);
 
   return (
-    <div>
-      
-
+    <Box sx={{ width: '100%', p: 0, m: 0, backgroundColor: '#f5f5f5' }}>
       {/* Hero Section */}
-      <HeroSection city={city} setCity={setCity} />
+      <HeroSection />
 
       {/* Main Content */}
-      <Container sx={{ marginTop: '40px' }}>
-        <Typography variant="h5" sx={{ marginBottom: '20px' }}>
-          Welcome {user?.name || 'Guest'}!
-        </Typography>
-
+      <Box sx={{ mt: 0, px: 0 }}>
         <MainContent city={city} hotels={hotels} />
-      </Container>
-
-      
-    </div>
+      </Box>
+    </Box>
   );
 };
 

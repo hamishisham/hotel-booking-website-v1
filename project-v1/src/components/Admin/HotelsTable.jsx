@@ -1,10 +1,9 @@
-// components/HotelsTable.jsx
 import React, { useState } from "react";
 import {
   Box, Button, CircularProgress, Table, TableBody, TableCell, TableHead,
   TableRow, Typography, useTheme, IconButton, Avatar, FormControl,
   InputLabel, Select, MenuItem, TextField, Dialog, DialogTitle,
-  DialogContent, DialogContentText, DialogActions, TablePagination
+  DialogContent, DialogContentText, DialogActions, TablePagination, useMediaQuery
 } from "@mui/material";
 import { Rating } from "@mui/material";
 import { Visibility, Edit, Delete, Add } from "@mui/icons-material";
@@ -18,6 +17,9 @@ const HotelsTable = () => {
   const { hotels, loading, deleteHotel, updateHotel, addHotel } = useHotels();
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
+
+  // useMediaQuery to detect small screens
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [searchField, setSearchField] = useState('name');
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,7 +37,7 @@ const HotelsTable = () => {
     rating: 0,
     description: "",
     image: "",
-    gallery: []
+  pricePerNight: 0 
   });
 
   const [errors, setErrors] = useState({});
@@ -48,6 +50,7 @@ const HotelsTable = () => {
     if (!data.location) newErrors.location = "Location is required";
     if (!data.image) newErrors.image = "Image is required";
     if (data.rating === 0) newErrors.rating = "Rating is required";
+    if (data.pricepernight <= 0) newErrors.pricepernight = "Price must be greater than 0";
     return newErrors;
   };
 
@@ -77,7 +80,11 @@ const HotelsTable = () => {
   };
 
   const handleEditChange = (e) => {
-    setEditedData({ ...editedData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setEditedData({
+      ...editedData,
+      [name]: name === "pricePerNight" ? parseFloat(value) : value
+    });
   };
 
   const handleEditSave = () => {
@@ -91,7 +98,11 @@ const HotelsTable = () => {
   };
 
   const handleAddChange = (e) => {
-    setNewHotelData({ ...newHotelData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setNewHotelData({
+      ...newHotelData,
+      [name]: name === "pricePerNight" ? parseFloat(value) : value
+    });
   };
 
   const handleAddSave = () => {
@@ -108,7 +119,7 @@ const HotelsTable = () => {
       rating: 0,
       description: "",
       image: "",
-      gallery: []
+      pricePerNight: 0
     });
     setErrors({});
   };
@@ -146,24 +157,24 @@ const HotelsTable = () => {
   return (
     <Box p={3} sx={{ bgcolor: isDarkMode ? "#1e1e1e" : "#fff", borderRadius: 2, boxShadow: 2 }}>
       {/* Title and Add button */}
-      <Box display="flex" justifyContent="space-between" mb={2}>
-  <Typography variant="h5">Hotel List</Typography>
-  <Button
-    variant="contained"
-    color="primary"
-    startIcon={<Add />}
-    onClick={() => {
-      setErrors({});
-      setAddOpen(true);
-    }}
-  >
-    Add New Hotel
-  </Button>
-</Box>
-
+      <Box display="flex" justifyContent="space-between" mb={2} flexWrap="wrap" gap={1}>
+        <Typography variant="h5">Hotel List</Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<Add />}
+          onClick={() => {
+            setErrors({});
+            setAddOpen(true);
+          }}
+          sx={{ mt: isSmallScreen ? 1 : 0 }}
+        >
+          Add New Hotel
+        </Button>
+      </Box>
 
       {/* Search */}
-<Box display="flex" flexWrap="wrap" gap={2} mb={4} justifyContent="flex-start">
+      <Box display="flex" flexWrap="wrap" gap={2} mb={4} justifyContent="flex-start">
         <FormControl size="small" sx={{ minWidth: 120 }}>
           <InputLabel>Search by</InputLabel>
           <Select
@@ -181,40 +192,57 @@ const HotelsTable = () => {
           size="small"
           onChange={(e) => {
             setSearchTerm(e.target.value);
-            setPage(0); // Reset to first page on search
+            setPage(0);
           }}
+          sx={{ minWidth: 180 }}
         />
       </Box>
 
-      {/* Table */}
-      <Table size="small">
-        <TableHead>
-          <TableRow sx={{ bgcolor: isDarkMode ? "#2c2c2c" : "#f5f5f5" }}>
-            {["Image", "Name", "Location", "Rating", "Actions"].map(head => (
-              <TableCell key={head} sx={{ fontWeight: "bold" }}>{head}</TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {paginatedHotels.map(hotel => (
-            <TableRow key={hotel.id} sx={{ "&:hover": { backgroundColor: isDarkMode ? "#2a2a2a" : "#f9f9f9" } }}>
-              <TableCell>
-                <Avatar variant="rounded" src={hotel.image} alt={hotel.name} sx={{ width: 40, height: 40 }} />
-              </TableCell>
-              <TableCell>{hotel.name}</TableCell>
-              <TableCell>{hotel.location}</TableCell>
-              <TableCell>
-                <Rating value={hotel.rating} precision={0.5} readOnly size="small" />
-              </TableCell>
-              <TableCell>
-                <IconButton onClick={() => handleView(hotel)} color="primary"><Visibility fontSize="small" /></IconButton>
-                <IconButton onClick={() => handleEdit(hotel)} color="secondary"><Edit fontSize="small" /></IconButton>
-                <IconButton onClick={() => handleDeleteClick(hotel)} color="error"><Delete fontSize="small" /></IconButton>
-              </TableCell>
+      {/* Table wrapper with horizontal scroll on small screens */}
+      <Box sx={{ overflowX: 'auto' }}>
+        <Table size="small" sx={{ minWidth: 650 }}>
+          <TableHead>
+            <TableRow sx={{ bgcolor: isDarkMode ? "#2c2c2c" : "#f5f5f5" }}>
+              {["Image", "Name", "Location", "Rating", "Price Per Night($)", "Actions"].map((head) => (
+                <TableCell key={head} sx={{ fontWeight: "bold", whiteSpace: 'nowrap' }}>
+                  {head}
+                </TableCell>
+              ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHead>
+          <TableBody>
+            {paginatedHotels.map((hotel) => (
+              <TableRow
+                key={hotel.id}
+                sx={{ "&:hover": { backgroundColor: isDarkMode ? "#2a2a2a" : "#f9f9f9" } }}
+              >
+                <TableCell>
+                  <Avatar variant="rounded" src={hotel.image} alt={hotel.name} sx={{ width: 40, height: 40 }} />
+                </TableCell>
+                <TableCell sx={{ maxWidth: isSmallScreen ? 120 : 'auto', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {hotel.name}
+                </TableCell>
+                <TableCell sx={{ maxWidth: isSmallScreen ? 120 : 'auto', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {hotel.location}
+                </TableCell>
+                <TableCell>
+                  <Rating value={hotel.rating} precision={0.5} readOnly size="small" />
+                </TableCell>
+                <TableCell>
+                  {typeof hotel.pricePerNight === "number"
+                    ? `$${hotel.pricePerNight.toFixed(2)}`
+                    : "N/A"}
+                </TableCell>
+                <TableCell>
+                  <IconButton onClick={() => handleView(hotel)} color="primary"><Visibility fontSize="small" /></IconButton>
+                  <IconButton onClick={() => handleEdit(hotel)} color="secondary"><Edit fontSize="small" /></IconButton>
+                  <IconButton onClick={() => handleDeleteClick(hotel)} color="error"><Delete fontSize="small" /></IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Box>
 
       {/* Pagination */}
       <TablePagination
@@ -257,11 +285,11 @@ const HotelsTable = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmOpen(false)} color="primary">Cancel</Button>
-          <Button onClick={handleConfirmDelete} color="error" variant="contained">Delete</Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
-  );
+         <Button onClick={handleConfirmDelete} color="error">Delete</Button>
+</DialogActions>
+</Dialog>
+</Box>
+);
 };
 
 export default HotelsTable;

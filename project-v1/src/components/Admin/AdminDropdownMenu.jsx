@@ -52,7 +52,6 @@ const AdminDropdownMenu = () => {
           },
         }}
       >
-        <MenuItem sx={{ color: menuColor }}>Profile</MenuItem>
         <MenuItem sx={{ color: menuColor }} onClick={handleLogout}>Logout</MenuItem>
       </Menu>
     </>

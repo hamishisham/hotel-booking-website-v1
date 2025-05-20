@@ -1,20 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Button, TextField, CardMedia, Rating } from '@mui/material';
+import { Box, Typography, Button, TextField, CardMedia, Rating, Grid } from '@mui/material';
 import { useHotels } from '../../context/HotelContext';
-import { useState } from 'react';
+import { useBookings } from '../../context/BookingContext';
+import { useAuth } from '../../context/AuthContext'; // ✅ تأكد من وجود السياق ده
 
 const BookingPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { hotels } = useHotels();
+  const { createBooking } = useBookings();
+  const { user } = useAuth(); // ✅ الحصول على اليوزر المسجل
+
+  // انتظار تحميل الفنادق
+  if (!hotels || hotels.length === 0) {
+    return <Typography variant="h6">Loading hotels...</Typography>;
+  }
 
   const hotel = hotels.find(h => h.id === Number(id));
 
   const [bookingData, setBookingData] = useState({
     name: '',
-    email: '',
-    dates: '',
+    checkIn: '',
+    checkOut: '',
+    numberOfRooms: 1,
+    adults: 1,
+    children: 0,
   });
 
   if (!hotel) {
@@ -22,12 +33,21 @@ const BookingPage = () => {
   }
 
   const handleChange = (e) => {
-    setBookingData({ ...bookingData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setBookingData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleBookingSubmit = () => {
-    alert(`Booking confirmed for ${bookingData.name} at ${hotel.name}`);
-    navigate('/');
+  const handleBookingSubmit = async () => {
+    const newBooking = {
+      ...bookingData,
+      userId: user.id, // ✅ ربط الحجز باليوزر
+      hotelId: hotel.id,
+      hotelName: hotel.name,
+      hotelCity: hotel.city,
+    };
+
+    await createBooking(newBooking);
+    navigate('/history'); // ✅ إعادة التوجيه لصفحة التاريخ
   };
 
   return (
@@ -41,7 +61,7 @@ const BookingPage = () => {
         mx: 'auto',
       }}
     >
-      {/* يسار - تفاصيل الفندق */}
+      {/* Left - Hotel Info */}
       <Box sx={{ flex: 1, backgroundColor: '#f9f9f9', p: 3, borderRadius: 2 }}>
         <CardMedia
           component="img"
@@ -67,7 +87,7 @@ const BookingPage = () => {
         </Box>
       </Box>
 
-      {/* يمين - نموذج الحجز */}
+      {/* Right - Booking Form */}
       <Box sx={{ flex: 1, p: 3, border: '1px solid #ddd', borderRadius: 2 }}>
         <Typography variant="h4" gutterBottom>
           Booking for {hotel.name}
@@ -81,23 +101,72 @@ const BookingPage = () => {
           onChange={handleChange}
           margin="normal"
         />
-        <TextField
-          fullWidth
-          label="Your Email"
-          name="email"
-          value={bookingData.email}
-          onChange={handleChange}
-          margin="normal"
-        />
-        <TextField
-          fullWidth
-          label="Booking Dates"
-          name="dates"
-          value={bookingData.dates}
-          onChange={handleChange}
-          margin="normal"
-          placeholder="e.g. 2025-06-01 to 2025-06-05"
-        />
+
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              label="Check-In"
+              name="checkIn"
+              type="date"
+              value={bookingData.checkIn}
+              onChange={handleChange}
+              margin="normal"
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              label="Check-Out"
+              name="checkOut"
+              type="date"
+              value={bookingData.checkOut}
+              onChange={handleChange}
+              margin="normal"
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+        </Grid>
+
+        <Grid container spacing={2}>
+          <Grid item xs={4}>
+            <TextField
+              fullWidth
+              label="Rooms"
+              name="numberOfRooms"
+              type="number"
+              value={bookingData.numberOfRooms}
+              onChange={handleChange}
+              margin="normal"
+              inputProps={{ min: 1 }}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <TextField
+              fullWidth
+              label="Adults"
+              name="adults"
+              type="number"
+              value={bookingData.adults}
+              onChange={handleChange}
+              margin="normal"
+              inputProps={{ min: 1 }}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <TextField
+              fullWidth
+              label="Children"
+              name="children"
+              type="number"
+              value={bookingData.children}
+              onChange={handleChange}
+              margin="normal"
+              inputProps={{ min: 0 }}
+            />
+          </Grid>
+        </Grid>
 
         <Button
           variant="contained"

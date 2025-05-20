@@ -53,6 +53,22 @@ const Login = () => {
       alert("An error occurred during login");
     }
   };
+  const handleAdminLogin = async () => {
+  try {
+    const { data: users } = await axios.get("https://hotel-json-server-production.up.railway.app/users");
+    const adminUser = users.find(u => u.role === 'admin');
+    if (adminUser) {
+      login(adminUser);
+      navigate('/dashboard');
+    } else {
+      alert("No admin user found.");
+    }
+  } catch (err) {
+    console.error("Admin login failed", err);
+    alert("An error occurred during admin login");
+  }
+};
+
 
   return (
     <Container
@@ -146,6 +162,15 @@ const Login = () => {
           >
             Login
           </Button>
+          <Button
+  fullWidth
+  variant="outlined"
+  color="secondary"
+  sx={{ mt: 1 }}
+  onClick={handleAdminLogin}
+>
+  Log in as Admin
+</Button>
         </form>
 
         <Typography

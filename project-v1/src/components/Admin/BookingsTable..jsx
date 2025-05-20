@@ -5,6 +5,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   Typography,
@@ -45,7 +46,6 @@ const BookingsTable = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
 
-  // Pagination states
   const [page, setPage] = useState(0);
   const rowsPerPage = 5;
 
@@ -53,7 +53,6 @@ const BookingsTable = () => {
     b[searchField]?.toString().toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Paginate filtered bookings
   const paginatedBookings = filteredBookings.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
@@ -84,7 +83,6 @@ const BookingsTable = () => {
   const handleSave = async () => {
     await updateBooking(selectedBooking);
     handleCloseDialog();
-    // Optionally reset page to 0 or keep current page
   };
 
   const handleDelete = async () => {
@@ -108,7 +106,11 @@ const BookingsTable = () => {
   return (
     <Box
       p={3}
-      sx={{ bgcolor: isDarkMode ? "#1e1e1e" : "#fff", borderRadius: 2, boxShadow: 2 }}
+      sx={{
+        bgcolor: isDarkMode ? "#1e1e1e" : "#fff",
+        borderRadius: 2,
+        boxShadow: 2,
+      }}
     >
       <Typography variant="h5" mb={2}>
         Bookings List
@@ -135,85 +137,116 @@ const BookingsTable = () => {
           size="small"
           onChange={(e) => {
             setSearchTerm(e.target.value);
-            setPage(0); // Reset page when searching
+            setPage(0);
           }}
         />
       </Box>
 
-      {/* Bookings Table */}
-      <Table size="small">
-        <TableHead>
-          <TableRow sx={{ bgcolor: isDarkMode ? "#2c2c2c" : "#f5f5f5" }}>
-            {[
-              "User ID",
-              "Hotel ID",
-              "Room",
-              "Check-In",
-              "Check-Out",
-              "Status",
-              "Actions",
-            ].map((head) => (
-              <TableCell key={head} sx={{ fontWeight: "bold" }}>
-                {head}
-              </TableCell>
+      {/* Responsive Table Container */}
+      <TableContainer
+        sx={{
+          maxHeight: 440,
+          overflowX: "auto",
+          // optional: add border radius & shadow for container
+          borderRadius: 1,
+          boxShadow: 1,
+          bgcolor: isDarkMode ? "#2a2a2a" : "#fafafa",
+        }}
+      >
+        <Table stickyHeader size="small" aria-label="bookings table">
+          <TableHead>
+            <TableRow
+              sx={{ bgcolor: isDarkMode ? "#2c2c2c" : "#f5f5f5" }}
+            >
+              {[
+                "User ID",
+                "Hotel ID",
+                "Room",
+                "Check-In",
+                "Check-Out",
+                "Status",
+                "Rooms",
+                "Adults",
+                "Children",
+                "Actions",
+              ].map((head) => (
+                <TableCell
+                  key={head}
+                  sx={{
+                    fontWeight: "bold",
+                    whiteSpace: "nowrap",
+                    minWidth: head === "Actions" ? 110 : 80,
+                  }}
+                >
+                  {head}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {paginatedBookings.map((b) => (
+              <TableRow key={b.id} hover>
+                <TableCell>{b.userId}</TableCell>
+                <TableCell>{b.hotelId}</TableCell>
+                <TableCell>{b.roomNumber}</TableCell>
+                <TableCell>{b.checkIn}</TableCell>
+                <TableCell>{b.checkOut}</TableCell>
+                <TableCell sx={{ color: STATUS_COLORS[b.status] || "inherit" }}>
+                  {b.status}
+                </TableCell>
+                <TableCell>{b.numberOfRooms}</TableCell>
+                <TableCell>{b.adults}</TableCell>
+                <TableCell>{b.children}</TableCell>
+                <TableCell>
+                  <IconButton
+                    onClick={() => handleOpenDialog(b, true)}
+                    color="secondary"
+                    size="small"
+                    aria-label="edit booking"
+                  >
+                    <Edit fontSize="small" />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => handleDeleteConfirm(b)}
+                    color="error"
+                    size="small"
+                    aria-label="delete booking"
+                  >
+                    <Delete fontSize="small" />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
             ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {paginatedBookings.map((b) => (
-            <TableRow key={b.id}>
-              <TableCell>{b.userId}</TableCell>
-              <TableCell>{b.hotelId}</TableCell>
-              <TableCell>{b.roomNumber}</TableCell>
-              <TableCell>{b.checkIn}</TableCell>
-              <TableCell>{b.checkOut}</TableCell>
-              <TableCell sx={{ color: STATUS_COLORS[b.status] || "inherit" }}>
-                {b.status}
-              </TableCell>
-              <TableCell>
-                <IconButton onClick={() => handleOpenDialog(b)} color="primary">
-                  <Visibility fontSize="small" />
-                </IconButton>
-                <IconButton onClick={() => handleOpenDialog(b, true)} color="secondary">
-                  <Edit fontSize="small" />
-                </IconButton>
-                <IconButton onClick={() => handleDeleteConfirm(b)} color="error">
-                  <Delete fontSize="small" />
-                </IconButton>
-              </TableCell>
-            </TableRow>
-          ))}
 
-          {/* If no bookings found */}
-          {paginatedBookings.length === 0 && (
+            {paginatedBookings.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={10} align="center">
+                  No bookings found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+
+          <TableFooter>
             <TableRow>
-              <TableCell colSpan={7} align="center">
-                No bookings found.
-              </TableCell>
+              <TablePagination
+                rowsPerPageOptions={[rowsPerPage]}
+                count={filteredBookings.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                labelRowsPerPage=""
+                sx={{
+                  ".MuiTablePagination-actions": {
+                    justifyContent: "flex-end",
+                  },
+                }}
+              />
             </TableRow>
-          )}
-        </TableBody>
-
-        <TableFooter>
-          <TableRow>
-            <TablePagination
-              rowsPerPageOptions={[rowsPerPage]}
-              count={filteredBookings.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              // Hide the select box for rowsPerPage since fixed
-              labelRowsPerPage=""
-              sx={{
-                ".MuiTablePagination-actions": {
-                  // Optional: position pagination controls on right
-                  justifyContent: "flex-end",
-                },
-              }}
-            />
-          </TableRow>
-        </TableFooter>
-      </Table>
+          </TableFooter>
+        </Table>
+      </TableContainer>
 
       {/* Dialogs */}
       {selectedBooking && editMode && (
