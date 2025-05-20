@@ -16,11 +16,12 @@ const HotelDetails = ({ hotel }) => {
       <Typography variant="h5" mt={2} mb={1}>
         {hotel.name}
       </Typography>
-      <Typography variant="subtitle1" color="text.secondary" mb={1}>
-        Location: {hotel.city}
-      </Typography>
-      <Typography variant="body1" mb={2}>
+      <Typography variant="body1" mb={1}>
         {hotel.description || 'No description available.'}
+      </Typography>
+      {/* إضافة خانة السعر هنا */}
+      <Typography variant="body1" fontWeight="bold" mb={2}>
+        Price per night: {hotel.pricePerNight ? `$${hotel.pricePerNight}` : 'N/A'}
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Rating value={hotel.rating || 0} readOnly precision={0.5} />

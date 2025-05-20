@@ -26,13 +26,16 @@ const MainContent = () => {
     setUniqueCities(cities);
   }, [hotels]);
 
-  // فلترة الفنادق عند اختيار مدينة
-  const handleSearch = () => {
-    const filtered = hotels.filter((hotel) =>
-      hotel.location.split(',')[0].trim().toLowerCase() === city.toLowerCase()
-    );
-    setFilteredHotels(filtered);
-  };
+const handleSearch = () => {
+  const filtered = hotels.filter((hotel) => {
+    const hotelCity = hotel.location.split(',')[0].trim().toLowerCase();
+    const selected = city.trim().toLowerCase();
+    return hotelCity === selected;
+  });
+  setFilteredHotels(filtered);
+};
+
+
 
   return (
     <Container sx={{ py: 4 }}>
@@ -101,7 +104,7 @@ const MainContent = () => {
         </Grid>
       ) : (
         <Typography variant="h6" sx={{ textAlign: 'center', mt: 5 }}>
-          No hotels found {city && `in ${city}`}.
+          Click On Search To Find Hotels In  {city && `in ${city}`}.
         </Typography>
       )}
     </Container>

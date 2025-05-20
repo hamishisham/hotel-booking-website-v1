@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { useAuth } from "../context/AuthContext"; // تأكدي إن المسار صحيح حسب مشروعك
+import { useAuth } from "./AuthContext"; // تأكدي إن المسار صحيح حسب مشروعك
 
 // Create the context
 export const BookingContext = createContext();
@@ -24,7 +24,7 @@ const generateRandomRoomNumber = (existingRoomNumbers) => {
 export const BookingProvider = ({ children }) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { currentUser } = useAuth(); // Get current user
+const { user } = useAuth();
 
   // Fetch all bookings
   const fetchBookings = async () => {
@@ -48,7 +48,7 @@ export const BookingProvider = ({ children }) => {
         ...newBooking,
         roomNumber: randomRoomNumber,
         status: newBooking.status || "pending",
-        userId: currentUser?.id, // Automatically attach the userId
+        userId: user?.id, // Automatically attach the userId
       };
 
       const res = await axios.post(API_URL, bookingWithDefaults);
